@@ -39,8 +39,13 @@
   var cursors;
   var rabbits;
   var score = 0;
+  var lifeChances = 3;
   var gameOver = false;
   var scoreText;
+  var portals;
+  var rounds = 0;
+  var portal1;
+  var portla2;
 
   var game = new Phaser.Game(config);
 
@@ -51,7 +56,8 @@
       this.load.image('star', 'assets/star.png');
       this.load.image('bomb', 'assets/bomb.png');
       this.load.image('diamond', 'assets/diamond.png');
-      this.load.image('rabbit','assets/rabbit.png')
+      this.load.image('rabbit','assets/rabbit.png');
+      this.load.image('portal','assets/malyportal.png');
       this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
   }
 
@@ -62,9 +68,6 @@
 
       //  The platforms group contains the ground and the 2 ledges we can jump on
       platforms = this.physics.add.staticGroup();
-
-      //  Here we create the ground.
-      //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
       platforms.create(400, 568, 'ground').setScale(2).refreshBody();
 
       //  Now let's create some ledges
@@ -100,6 +103,7 @@
           repeat: -1
       });
 
+/*
       //Bad rabbit animation
       this.anims.create({
         key:'rabbitleft',
@@ -112,7 +116,7 @@
           frames: this.anims.generateFrameNumbers('rabbit', { start: 2, end: 3 }),
           frameRate: 4,
           repeat: -1
-      });
+      });*/
 
 
       //  Input Events
@@ -133,7 +137,7 @@
 
       });
 
-      bombs = this.physics.add.group();
+
 
       diamonds = this.physics.add.group({
         key: 'diamond',
@@ -146,12 +150,14 @@
           child.setBounceY(Phaser.Math.FloatBetween(0.1, 0.99));
       });
 
-
+      bombs = this.physics.add.group();
       rabbits = this.physics.add.group();
-
+      portals = this.physics.add.group();
 
       //  The score
       scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+      //The Life Chances
+      lifeChanceText = this.add.text(500, 16, 'Life chances: 3', { fontSize: '32px', fill: '#000' });
 
       //  Collide the player and the stars with the platforms
       this.physics.add.collider(player, platforms);
@@ -159,15 +165,14 @@
       this.physics.add.collider(bombs, platforms);
       this.physics.add.collider(diamonds,platforms);
       this.physics.add.collider(rabbits,platforms);
+      this.physics.add.collider(portals,platforms);
 
       //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
       this.physics.add.overlap(player, stars, collectStar, null, this);
-
       this.physics.add.collider(player, bombs, hitBomb, null, this);
-
       this.physics.add.collider(player,diamonds,collectDiamond,null,this);
-
       this.physics.add.collider(player,rabbits,hitRabbit,null,this);
+      this.physics.add.overlap(player,portals,goInPortal,null,this);
 
 
   }
@@ -221,6 +226,8 @@
 
           });
 
+          rounds += 1;
+
           var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
           var bomb = bombs.create(x, 16, 'bomb');
@@ -235,42 +242,55 @@
           diamond.setVelocity(Phaser.Math.Between(-500, 500), 10);
           diamond.allowGravity = false;
 
-          var rabbit = rabbits.create(x, 20, 'rabbit');
-          rabbit.setBounce(1);
-          rabbit.setCollideWorldBound(false);
-          rabbit.setVelocity(Phaser.Math.Between(-100, 100), 3);
-          rabbit.allowGravity = true;
+          if (rounds > 1)
+          {
+            var rabbit = rabbits.create(x, 20, 'rabbit');
+          //  game.rabbit.play('leftrabbit');
 
-
+            portal1 = portals.create(50,50,'portal');
+            portal2  = portals.create(450,100,'portal');
+          }
       }
   }
 
   function hitBomb (player, bomb)
   {
-      this.physics.pause();
+        lifeChances -= 1;
+        lifeChanceText.setText('Life chances: ' + lifeChances);
 
-      player.setTint(0xff0000);
+        if( lifeChances == 0)
+        {
+          this.physics.pause();
 
-      player.anims.play('turn');
+          player.setTint(0xff0000);
 
-      gameOver = true;
-  }
-
+          player.anims.play('turn');
+          gameOver = true;
+        }
+    }
   function collectDiamond(player,diamond)
   {
     diamond.disableBody(true, true);
     score +=50;
     scoreText.setText('Score: ' + score);
-
-}
+  }
   function hitRabbit (player,rabbit)
   {
     if (score >= 100){
       score -= 100;
       scoreText.setText('Score: ' + score);
-
     }
-
+  }
+  function goInPortal (player,portal)
+  {
+    if (portal == portal1){
+      player.x = 448;
+      player.y = 100;
+    }
+    if (portal == portal2){
+      player.x = 50;
+      player.y = 58;
+    }
   }
 
   </script>
