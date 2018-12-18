@@ -38,12 +38,15 @@
   var platforms;
   var cursors;
   var rabbits;
+  var sprite;
   var score = 0;
   var lifeChances = 3;
   var gameOver = false;
   var scoreText;
   var portals;
-  var rounds = 0;
+  var rounds = 1;
+  var roundText;
+  var lifeChanceText;
   var portal1;
   var portla2;
 
@@ -56,7 +59,7 @@
       this.load.image('star', 'assets/star.png');
       this.load.image('bomb', 'assets/bomb.png');
       this.load.image('diamond', 'assets/diamond.png');
-      this.load.image('rabbit','assets/rabbit.png');
+      this.load.spritesheet('rabbit','assets/rabbit.png',{ frameWidth: 32, frameHeight: 32 });
       this.load.image('portal','assets/malyportal.png');
       this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
   }
@@ -103,25 +106,8 @@
           repeat: -1
       });
 
-/*
-      //Bad rabbit animation
-      this.anims.create({
-        key:'rabbitleft',
-        frames: this.anims.generateFrameNumbers('rabbit', { start: 0, end: 1 }),
-        frameRate: 4,
-        repeat: -1
-      })
-      this.anims.create({
-          key: 'rabbitright',
-          frames: this.anims.generateFrameNumbers('rabbit', { start: 2, end: 3 }),
-          frameRate: 4,
-          repeat: -1
-      });*/
-
-
       //  Input Events
       cursors = this.input.keyboard.createCursorKeys();
-
 
       //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
       stars = this.physics.add.group({
@@ -131,13 +117,10 @@
       });
 
       stars.children.iterate(function (child) {
-
           //  Give each star a slightly different bounce
           child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
 
       });
-
-
 
       diamonds = this.physics.add.group({
         key: 'diamond',
@@ -155,9 +138,10 @@
       portals = this.physics.add.group();
 
       //  The score
-      scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+      scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000' });
       //The Life Chances
-      lifeChanceText = this.add.text(500, 16, 'Life chances: 3', { fontSize: '32px', fill: '#000' });
+      lifeChanceText = this.add.text(500, 16, 'Life chances: 3', { fontSize: '25px', fill: '#000' });
+      roundText = this.add.text(300, 16, 'Round: 1', { fontSize: '25px', fill: '#000' });
 
       //  Collide the player and the stars with the platforms
       this.physics.add.collider(player, platforms);
@@ -173,6 +157,18 @@
       this.physics.add.collider(player,diamonds,collectDiamond,null,this);
       this.physics.add.collider(player,rabbits,hitRabbit,null,this);
       this.physics.add.overlap(player,portals,goInPortal,null,this);
+
+      rabbit = rabbits.create(350,45,'rabbit');
+      this.anims.create({
+        key:'rabbitmove',
+        frames: this.anims.generateFrameNumbers('rabbit', { start: 0, end: 3 }),
+        frameRate: 4,
+        repeat: -1
+      })
+      rabbit.setCollideWorldBounds(true);
+      rabbit.anims.play('rabbitmove',true);
+      this.physics.add.collider(rabbit,platforms);
+      this.physics.add.collider(player,rabbit,hitRabbit,null,this);
 
 
   }
@@ -227,6 +223,7 @@
           });
 
           rounds += 1;
+          roundText.setText('Round:' + rounds);
 
           var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
@@ -242,13 +239,10 @@
           diamond.setVelocity(Phaser.Math.Between(-500, 500), 10);
           diamond.allowGravity = false;
 
-          if (rounds > 1)
+          if (rounds > 2)
           {
-            var rabbit = rabbits.create(x, 20, 'rabbit');
-          //  game.rabbit.play('leftrabbit');
-
-            portal1 = portals.create(50,50,'portal');
-            portal2  = portals.create(450,100,'portal');
+            portal1 = portals.create(350,50,'portal');
+            //mozna dodac portal 2
           }
       }
   }
@@ -284,12 +278,12 @@
   function goInPortal (player,portal)
   {
     if (portal == portal1){
-      player.x = 448;
+      player.x = 400;
       player.y = 100;
     }
     if (portal == portal2){
-      player.x = 50;
-      player.y = 58;
+      player.x = 40;
+      player.y = 50;
     }
   }
 
