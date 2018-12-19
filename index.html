@@ -46,6 +46,7 @@
   var portals;
   var rounds = 1;
   var roundText;
+  var endText;
   var lifeChanceText;
   var portal1;
   var portla2;
@@ -136,11 +137,14 @@
       bombs = this.physics.add.group();
       rabbits = this.physics.add.group();
       portals = this.physics.add.group();
+      
+	  
 
       //  The score
       scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000' });
       //The Life Chances
       lifeChanceText = this.add.text(500, 16, 'Life chances: 3', { fontSize: '25px', fill: '#000' });
+      //Round
       roundText = this.add.text(300, 16, 'Round: 1', { fontSize: '25px', fill: '#000' });
 
       //  Collide the player and the stars with the platforms
@@ -150,6 +154,8 @@
       this.physics.add.collider(diamonds,platforms);
       this.physics.add.collider(rabbits,platforms);
       this.physics.add.collider(portals,platforms);
+	  this.physics.add.collider(stars,portals);
+	  this.physics.add.collider(diamonds,portals);
 
       //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
       this.physics.add.overlap(player, stars, collectStar, null, this);
@@ -167,8 +173,8 @@
       })
       rabbit.setCollideWorldBounds(true);
       rabbit.anims.play('rabbitmove',true);
-      this.physics.add.collider(rabbit,platforms);
-      this.physics.add.collider(player,rabbit,hitRabbit,null,this);
+
+
 
 
   }
@@ -211,6 +217,7 @@
 
       //  Add and update the score
       score += 10;
+
       scoreText.setText('Score: ' + score);
 
       if (stars.countActive(true) === 0)
@@ -227,11 +234,13 @@
 
           var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
+          if (rounds ==2 ){
           var bomb = bombs.create(x, 16, 'bomb');
           bomb.setBounce(1);
           bomb.setCollideWorldBounds(true);
           bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
           bomb.allowGravity = false;
+        }
 
           var diamond = stars.create(x,14,'diamond');
           diamond.setBounce(1);
@@ -239,11 +248,16 @@
           diamond.setVelocity(Phaser.Math.Between(-500, 500), 10);
           diamond.allowGravity = false;
 
-          if (rounds > 2)
+          if (rounds == 3)
           {
-            portal1 = portals.create(350,50,'portal');
-            //mozna dodac portal 2
+            portal1 = portals.create(490,50,'portal');
+
           }
+		  if (rounds > 3)
+		  {
+			portal2 = portals.create (100,50,'portal');
+		  }
+		  
       }
   }
 
@@ -259,9 +273,11 @@
           player.setTint(0xff0000);
 
           player.anims.play('turn');
+		  endText = this.add.text(100,100, 'GAME OVER', { fontSize: '100px', fill: '#000' });
           gameOver = true;
         }
-    }
+  }
+
   function collectDiamond(player,diamond)
   {
     diamond.disableBody(true, true);
