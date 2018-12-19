@@ -116,10 +116,12 @@
           repeat: 11,
           setXY: { x: 12, y: 0, stepX: 70 }
       });
+      
 
       stars.children.iterate(function (child) {
           //  Give each star a slightly different bounce
           child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+          child.setCollideWorldBounds(true);
 
       });
 
@@ -163,6 +165,7 @@
       this.physics.add.collider(player,diamonds,collectDiamond,null,this);
       this.physics.add.collider(player,rabbits,hitRabbit,null,this);
       this.physics.add.overlap(player,portals,goInPortal,null,this);
+      this.physics.add.collider(stars,portals,goInPortal,null,this);
 
       rabbit = rabbits.create(350,45,'rabbit');
       this.anims.create({
@@ -173,7 +176,7 @@
       })
       rabbit.setCollideWorldBounds(true);
       rabbit.anims.play('rabbitmove',true);
-
+	  rabbit.setVelocityX(-50);
 
 
 
@@ -186,7 +189,7 @@
           return;
       }
 
-      if (cursors.left.isDown)
+	  if (cursors.left.isDown)
       {
           player.setVelocityX(-160);
 
@@ -240,6 +243,8 @@
           bomb.setCollideWorldBounds(true);
           bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
           bomb.allowGravity = false;
+		  rabbit.setVelocityX(+50);
+		
         }
 
           var diamond = stars.create(x,14,'diamond');
@@ -251,6 +256,8 @@
           if (rounds == 3)
           {
             portal1 = portals.create(490,50,'portal');
+			rabbit.setVelocityX(-50);
+		
 
           }
 		  if (rounds > 3)
